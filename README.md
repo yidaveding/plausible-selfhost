@@ -46,6 +46,13 @@ SSH_PUBLIC_KEY="ssh-rsa AAAAB3NzaC1yc2EA ...... ve@Dave-Work"
 ADMIN_PASSWORD="create_a_password"
 ```
 
+Step 3.1 (Optional) - enable Windows VM for On-Prem Data Gateway
+Change deployWindowsVm=true in deploy.ps1
+```
+    --paramecaters sshPublicKey=$env:SSH_PUBLIC_KEY adminPassword=$env:ADMIN_PASSWORD `
+        deployWindowsVm=false windowsAdminPassword=$env:WINDOWS_ADMIN_PASSWORD
+```
+
 Step 4 - deploy the infrastructure
 ```
 . .\deploy.ps1
@@ -65,3 +72,4 @@ Step 7 - ssh into the VM
 
 Step 8 - follow the instructions from Plausible to install and deploy the community edition
 
+Step 9 (if Gateway is required) - RDP into Windows VM, download install and configure On-Prem Data Gateway.

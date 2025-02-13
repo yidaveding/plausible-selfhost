@@ -10,4 +10,8 @@ if (Test-Path .env) {
 }
 
 # Deploy the Bicep file using Azure CLI
-az deployment group create --resource-group $ENV:RESOURCE_GROUP_NAME --template-file main.bicep --parameters sshPublicKey=$env:SSH_PUBLIC_KEY adminPassword=$env:ADMIN_PASSWORD
+az deployment group create `
+    --resource-group $ENV:RESOURCE_GROUP_NAME `
+    --template-file main.bicep `
+    --parameters sshPublicKey=$env:SSH_PUBLIC_KEY adminPassword=$env:ADMIN_PASSWORD `
+        deployWindowsVm=false windowsAdminPassword=$env:WINDOWS_ADMIN_PASSWORD

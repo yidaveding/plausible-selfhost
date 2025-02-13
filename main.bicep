@@ -6,6 +6,12 @@ param adminUsername string = 'azureuser'
 param adminPassword string
 param sshPublicKey string
 
+param deployWindowsVm bool = false
+param windowsVmName string = uniqueString(resourceGroup().id, 'windowsvm')
+param windowsAdminUsername string = 'azureuser'
+@secure()
+param windowsAdminPassword string
+
 resource publicIP 'Microsoft.Network/publicIPAddresses@2024-05-01' = {
   name: '${vmName}-publicIP'
   location: location
@@ -153,6 +159,72 @@ resource vm 'Microsoft.Compute/virtualMachines@2024-07-01' = {
       networkInterfaces: [
         {
           id: nic.id
+        }
+      ]
+    }
+  }
+}
+
+resource windowsPublicIP 'Microsoft.Network/publicIPAddresses@2024-05-01' = if (deployWindowsVm) {
+  name: '${windowsVmName}-publicIP'
+  location: location
+  properties: {
+    publicIPAllocationMethod: 'Dynamic'
+  }
+}
+
+resource windowsNic 'Microsoft.Network/networkInterfaces@2024-05-01' = if (deployWindowsVm) {
+  name: '${windowsVmName}-nic'
+  location: location
+  properties: {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          subnet: {
+            id: subnet.id
+          }
+          privateIPAllocationMethod: 'Dynamic'
+          publicIPAddress: {
+            id: windowsPublicIP.id
+          }
+        }
+      }
+    ]
+    networkSecurityGroup: {
+      id: nsg.id
+    }
+  }
+}
+
+resource windowsVm 'Microsoft.Compute/virtualMachines@2024-07-01' = if (deployWindowsVm) {
+  name: '${windowsVmName}-w'
+  location: location
+  properties: {
+    hardwareProfile: {
+      vmSize: 'Standard_D4s_v3'
+    }
+    storageProfile: {
+      imageReference: {
+        publisher: 'MicrosoftWindowsDesktop'
+        offer: 'Windows-10'
+        sku: 'win10-21h2-pro'
+        version: 'latest'
+      }
+      osDisk: {
+        createOption: 'FromImage'
+        diskSizeGB: 127
+      }
+    }
+    osProfile: {
+      computerName: '${windowsVmName}-w'
+      adminUsername: windowsAdminUsername
+      adminPassword: windowsAdminPassword
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: windowsNic.id
         }
       ]
     }
